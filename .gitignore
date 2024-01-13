@@ -1,0 +1,12 @@
+# Hugo
+/public/
+/resources/_gen/
+/node_modules/
+
+# Local development
+.hugo_build.lock
+.hugo_cache/
+.DS_Store
+
+# System files
+Thumbs.db

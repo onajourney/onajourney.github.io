@@ -1,0 +1,29 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = ''
+theme = 'papermod'
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "Blog"
+url = "/posts/"
+weight = 2
+
+[params.homeInfoParams]
+Title = "J. Daniels"
+Content = "Software, Science and Electronics"
+imageUrl = "/avatar.webp"
+imageTitle = "My Avatar"
+imageWidth = 160
+imageHeight = 160
+
+[params.fuseOpts]
+isCaseSensitive = false
+shouldSort = true
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
