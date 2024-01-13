@@ -3,10 +3,10 @@ languageCode = 'en-us'
 title = ''
 theme = 'papermod'
 
-[[menu.main]]
-name = "Home"
-url = "/"
-weight = 1
+# [[menu.main]]
+# name = "Home"
+# url = "/"
+# weight = 1
 
 # [[menu.main]]
 # name = "Blog"
