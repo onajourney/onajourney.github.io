@@ -13,6 +13,13 @@ name = "Notes"
 url = "/notes/"
 weight = 2
 
+# [params]
+# ShowFullTextinRSS = true
+
+# [params.socialIcons]
+# name = "rss"
+# url = "https://onajourney.github.io/index.xml"
+
 [params.homeInfoParams]
 Title = "J. Daniels"
 Content = "Curiosities of the mind"
