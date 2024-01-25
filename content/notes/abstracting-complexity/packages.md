@@ -1,24 +1,42 @@
 +++
 title = 'Abstracting Complexity - Packages'
 date = 2024-01-25T06:54:42-05:00
-draft = true
+draft = false
 +++
 
 In order to find the optimal way to handle package building and deployment let's establish our goals!
 
-We are going to (in isolation for a single package) try to automate building, deploying, versioning and generating a change log.
+We are going to (in isolation for a single package) try to automate building, deploying, versioning and generating a change log. So that every push to our main branch triggers the following process::
 
-## Instroducing: semantic-release.
+```mermaid
+sequenceDiagram
+    participant Developer
+    participant Git
+    participant CI
+    participant semantic-release
+    participant Package Registry
+    Developer->>Git: Push commit with<br/>conventional message
+    Git->>CI: Trigger CI pipeline
+    CI->>semantic-release: Run semantic-release
+    semantic-release->>semantic-release: Analyze commit messages
+    semantic-release->>semantic-release: Determine next version
+    semantic-release->>semantic-release: Generate release notes
+    semantic-release->>Git: Create Git tag
+    semantic-release->>Package Registry: Publish package
+    Package Registry-->>Developer: Confirm package published
+```
+
+## Introducing: semantic-release.
 
 "semantic-release automates the whole package release workflow including: determining the next version number, generating the release notes, and publishing the package." 
 
-This effectively solves deployment 3 out of 4 of our goals.
+This effectively addresses three out of four of our goals.
 
 We can handle the building step by leveraging a github workflow. 
 
-As always, nothing is every truly free. And in our case we must adopt a new convention into our development workflow (do note that I consider this an absolute benefit as it drives consistancy and maintaining a relevant commit history).
+As always, nothing is ever truly free. And in our case we must adopt a new convention into our development workflow (do note that I consider this an absolute benefit as it drives consistancy and maintaining a relevant commit history).
 
-The convetion is as follows: When commiting we must use the following syntax `type(scope):subject` or a more *semantic* example `git commit -m 'bug(auth): Fixed session timeout issue causing premature logouts'` we can provide additional information through the body and references in the footer but we will skip those, but for brevity I have included those examples [here](https://gist.github.com/onajourney/f875edb9e88840787303dbbe6fe3be14).
+The convention is as follows: When commiting we must use the following syntax `type(scope):subject` or a more *semantic* example `git commit -m 'bug(auth): Fixed session timeout issue causing premature logouts'`. Do note that scope is optional and we can provide additional information through the body and references in the footer but we will skip those, but for brevity I have included those examples [here](https://gist.github.com/onajourney/f875edb9e88840787303dbbe6fe3be14).
 
 A quick reference of types: 
 
@@ -31,47 +49,21 @@ A quick reference of types:
 - **test🧪:** Test related (adding missing tests, refactoring tests)
 - **chore🧹:** Changes to the build process
 
-As long as we follow these conventions and through some CI magic our push requests should start the following process:
-
-```mermaid
-sequenceDiagram
-    participant Developer
-    participant Git
-    participant CI
-    participant semantic-release
-    participant npm
-    Developer->>Git: Push commit with<br/>conventional message
-    Git->>CI: Trigger CI pipeline
-    CI->>semantic-release: Run semantic-release
-    semantic-release->>semantic-release: Analyze commit messages
-    semantic-release->>semantic-release: Determine next version
-    semantic-release->>semantic-release: Generate release notes
-    semantic-release->>Git: Create Git tag
-    semantic-release->>npm: Publish package
-    npm-->>Developer: Confirm package published
-```
+Only fix and feat will trigger new releases. Since it uses semantic versioning (MAJOR.MINOR.PATCH), this means a 'fix' will bump up the patch version, and a 'feat' will bump up the minor version. To increase the major version, you must include 'BREAKING CHANGE' in the body of the commit message.
 
 ## Setting up - Code
 
-We must first install sementic-release into our project. 
-
-`npm install --save-dev semantic-release`
-
-Will keep things simple by operating without plugins and using defaults for options and modes. 
-
-We will also pass any options we need via the CLI to avoid polluting our project directory until it makes sense to have a configuration file (either due to complexity or the need to in the case of using and configuring a plugin).
-
-Since sementic release defaults to the primary branch, a simple command in our `package.json` file should suffice! 
+Rather than installing `npm install --save-dev semantic-release` locally and setting up a script command in our package.json file
 
 ```
 "scripts": {
-  "release": "semantic-release"
+  "release": "semantic-release --branches main"
 }
 ```
+we will let our work flow handle it without touching our codebase. We will do the same for our build process.
 
-We have two choices for package publishing - we could incorporate it into our github workflow or let semantic release handle it. 
+Let's create our workflow file `.github/workflows/build-and-publish.yml`:
 
-Lastly we will create our workflow file `.github/workflows/build-and-publish.yml`:
 ```yml
 name: Build and Publish
 
@@ -84,46 +76,59 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 'node'] # 'node' is the latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
+        node-version: 20.x
+    - name: Bundle and Minimize with esbuild
+      run: npx esbuild src/index.js --bundle --minify --outfile=dist/index.js
+    - name: Copy package.json to dist (for publishing)
+      run: cp package.json dist/
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: publishing-artifacts
+        path: dist
 
-  publish:
-    needs: build-and-test
+  publish-to-github:
+    needs: build
+    permissions:
+      contents: write
+      packages: write
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' # Run only on push to main
+    if: github.ref == 'refs/heads/main'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 'node'
-    - run: npm ci
+        node-version: 20.x
+        registry-url: 'https://npm.pkg.github.com/'
+    - name: Download built artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: publishing-artifacts
+        path: dist
+    - name: Update Package Name To Follow Scope Naming
+      run: cd dist && npm pkg set name="@$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/$(npm pkg get name | jq -r .)"
     - name: Semantic Release
-      run: npx semantic-release
+      run: cd dist && npx semantic-release --branches main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # semantic-release uses this to create releases on GitHub
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # semantic-release uses this to publish your package to npm 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
-Set the node-version matrix to the versions you want your package to support, or set it to the version your application uses to ensure compatibility.
 
-I will skip testing as in the context of our fictional package we don't have any - BUT DO TEST. Testing is at the heart of automation and CI/CD.
+I will skip testing within our workflow as in the context of our fictional package we don't have any tests - BUT DO TEST. Testing is at the heart of automation and CI/CD.
 
-Update your test script to run your tests, and add a testing step or job to your workflow. 
+Since in my example I am publishing to the gihub package registry I have a step to rename my package to follow githubs scoped naming convention - this is not necessary, you could of course just name the package following this convention. I have also provided an example for publishing to NPM [here](https://gist.github.com/onajourney/d8f3aa09deb4f9950c660a4ab8bbf9d3). And an attempt at publishing to both GitHub packages and npm [here](https://gist.github.com/onajourney/e5a0b372be30e19220db818ba190b31d) (this one is a WIP as there is a race condition between the publishing jobs- only ones wins the race, the other one sees the tags in the repository and assumes it has already published).
 
-## Setting up - Secrets
 
-If we want to automate pushing to NPM we must setup a token for semantic-release to use (which the workflow is expecting in `NPM_TOKEN: ${{ secrets.NPM_TOKEN }}`).
+## Conclusion
 
-Generate a secret in your NPM account (A granular token with write access), set expiry to taste.
+Overall, I am happy with this process for publishing a package. I no longer have to worry about publishing as the workflow handles it for me. I no longer have to worry about publishing as the workflow handles for me. Same for release notes and versioning. I can use TypeScript with a small change (updating the source in esbuild to the ts file). 
 
-Add said token to you repository under `Settings->Secrets and variables->Actions` as a secret repository secret `NPM_TOKEN`.
-
+Similar to this site, I merely make my change and push away and go on to enjoy my day.
