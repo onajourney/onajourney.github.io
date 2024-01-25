@@ -3,3 +3,12 @@ This is just a placeholder blank stylesheet so as to support adding custom style
 
 Read https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#bundling-custom-css-with-themes-assets for more info
 */
+
+.mermaid {
+    margin: 52px auto; 
+}
+
+.mermaid svg {
+    margin: auto;
+    display: block;
+}

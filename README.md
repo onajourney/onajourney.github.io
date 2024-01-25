@@ -6,4 +6,4 @@ A slightly modified version of PaperMod.
 
  # Create new content
 
- `hugo new content notes/abstractin-complexity/new-post.md`
+ `hugo new content notes/abstracting-complexity/new-post.md`
