@@ -51,7 +51,7 @@ A quick reference of types:
 
 Only fix and feat will trigger new releases. Since it uses semantic versioning (MAJOR.MINOR.PATCH), this means a 'fix' will bump up the patch version, and a 'feat' will bump up the minor version. To increase the major version, you must include 'BREAKING CHANGE' in the body of the commit message.
 
-## Setting up - Code
+## Setting up our workflow
 
 Rather than installing `npm install --save-dev semantic-release` locally and setting up a script command in our package.json file
 
