@@ -17,7 +17,7 @@ sequenceDiagram
     participant Package Registry
     Developer->>Git: Push commit with<br/>conventional message
     Git->>CI: Trigger CI pipeline
-    CI->>semantic-release: Run semantic-release
+    CI->>semantic-release: Build and run<br/>semantic-release
     semantic-release->>semantic-release: Analyze commit messages
     semantic-release->>semantic-release: Determine next version
     semantic-release->>semantic-release: Generate release notes
