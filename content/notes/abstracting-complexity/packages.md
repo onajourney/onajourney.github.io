@@ -131,3 +131,4 @@ Since in my example I am publishing to the gihub package registry I have a step 
 
 Overall, I am happy with this process for publishing a package. I no longer need to worry about minimizing/building my JS code as the workflow handles it for me. I no longer have to worry about publishing as the workflow handles it for me. Same for release notes and versioning.
 
+{{< haiku "I make my change, push," "then step back and walk away," "joy fills up my day." >}}
