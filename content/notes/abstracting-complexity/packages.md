@@ -129,6 +129,10 @@ Since in my example I am publishing to the gihub package registry I have a step 
 
 ## Conclusion
 
-Overall, I am happy with this process for publishing a package. I no longer have to worry about publishing as the workflow handles it for me. I no longer have to worry about publishing as the workflow handles for me. Same for release notes and versioning. I can use TypeScript with a small change (updating the source in esbuild to the ts file). 
+Overall, I am happy with this process for publishing a package. I no longer need to worry about minimizing/building my JS code as the workflow handles it for me. I no longer have to worry about publishing as the workflow handles it for me. Same for release notes and versioning.
 
-Similar to this site, I merely make my change and push away and go on to enjoy my day.
+```
+I make my change, push,
+then step back and walk away,
+joy fills up my day.
+```
