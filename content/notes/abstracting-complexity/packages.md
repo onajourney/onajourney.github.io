@@ -1,6 +1,7 @@
 +++
 title = 'Abstracting Complexity - Packages'
 date = 2024-01-25T06:54:42-05:00
+tags = ["CI/CD", "Semantic Versioning", "Architecture]
 draft = false
 +++
 
