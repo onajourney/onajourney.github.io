@@ -1,13 +1,15 @@
+
 +++
 title = 'Abstracting Complexity - Packages'
 date = 2024-01-25T06:54:42-05:00
 tags = ["CI/CD", "Semantic Versioning", "Architecture"]
 draft = false
+weight = 3
 +++
 
-In order to find the optimal way to handle package building and deployment let's establish our goals!
+In order to find the optimal way to handle package building, deployment, versioning, and generating a changelog, let's establish our goals!
 
-We are going to (in isolation for a single package) try to automate building, deploying, versioning and generating a change log. So that every push to our main branch triggers the following process::
+We aim to automate building, deploying, versioning, and generating a changelog for a single package in isolation. So, every push to our main branch triggers the following process:
 
 ```mermaid
 sequenceDiagram
@@ -29,41 +31,42 @@ sequenceDiagram
 
 ## Introducing: semantic-release.
 
-"semantic-release automates the whole package release workflow including: determining the next version number, generating the release notes, and publishing the package." 
+"semantic-release automates the whole package release workflow including determining the next version number, generating the release notes, and publishing the package."
 
 This effectively addresses three out of four of our goals.
 
-We can handle the building step by leveraging a github workflow. 
+We can handle the building step by leveraging a GitHub workflow.
 
-As always, nothing is ever truly free. And in our case we must adopt a new convention into our development workflow (do note that I consider this an absolute benefit as it drives consistancy and maintaining a relevant commit history).
+As always, nothing is ever truly free. In our case, we must adopt a new convention into our development workflow (do note that I consider this an absolute benefit as it drives consistency and maintains a relevant commit history).
 
-The convention is as follows: When commiting we must use the following syntax `type(scope):subject` or a more *semantic* example `git commit -m 'bug(auth): Fixed session timeout issue causing premature logouts'`. Do note that scope is optional and we can provide additional information through the body and references in the footer but we will skip those, but for brevity I have included those examples [here](https://gist.github.com/onajourney/f875edb9e88840787303dbbe6fe3be14).
+The convention is as follows: When committing, we must use the following syntax type(scope): subject or a more semantic example git commit -m 'bug(auth): Fixed session timeout issue causing premature logouts'. Note that scope is optional, and we can provide additional information through the body and references in the footer, but for brevity, I have included those examples here.
 
-A quick reference of types: 
+A quick reference of types:
 
-- **feat✨:** A new feature
-- **fix🐛:** A bug fix
-- **docs📚:** Documentation changes
-- **style🖊️:** Fixing whitespace, improving readability, or complying with coding style guidelines (Not design or CSS changes)
-- **refactor🔨:** Code changes that neither fixes a bug or adds a feature
-- **perf📈:** change that improves performance
-- **test🧪:** Test related (adding missing tests, refactoring tests)
-- **chore🧹:** Changes to the build process
+- **feat✨:** A new feature.
+- **fix🐛:** A bug fix.
+- **docs📚:** Documentation changes.
+- **style🖊️:** Fixing whitespace, improving readability, or complying with coding style guidelines (Not design or CSS changes).
+- **refactor🔨:** Code changes that neither fixes a bug nor adds a feature.
+- **perf📈:** A change that improves performance.
+- **test🧪:** Test related (adding missing tests, refactoring tests).
+- **chore🧹:** Changes to the build process.
 
-Only fix and feat will trigger new releases. Since it uses semantic versioning (MAJOR.MINOR.PATCH), this means a 'fix' will bump up the patch version, and a 'feat' will bump up the minor version. To increase the major version, you must include 'BREAKING CHANGE' in the body of the commit message.
+Only `fix` and `feat` will trigger new releases. Since it uses semantic versioning (MAJOR.MINOR.PATCH), a `fix` will bump up the patch version, and a `feat` will bump up the minor version. To increase the major version, you must include `BREAKING CHANGE` in the body of the commit message.
 
 ## Setting up our workflow
 
-Rather than installing `npm install --save-dev semantic-release` locally and setting up a script command in our package.json file
+Rather than installing npm install --save-dev semantic-release locally and setting up a script command in our package.json file:
 
 ```
 "scripts": {
   "release": "semantic-release --branches main"
 }
 ```
-we will let our work flow handle it without touching our codebase. We will do the same for our build process.
 
-Let's create our workflow file `.github/workflows/build-and-publish.yml`:
+we will let our workflow handle it without touching our codebase. We will do the same for our build process.
+
+Let's create our workflow file .github/workflows/build-and-publish.yml:
 
 ```yml
 name: Build and Publish
@@ -123,9 +126,9 @@ jobs:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-I will skip testing within our workflow as in the context of our fictional package we don't have any tests - BUT DO TEST. Testing is at the heart of automation and CI/CD.
+I will skip testing within our workflow as, in the context of our fictional package, we don't have any tests - BUT DO TEST. Testing is at the heart of automation and CI/CD.
 
-Since in my example I am publishing to the gihub package registry I have a step to rename my package to follow githubs scoped naming convention - this is not necessary, you could of course just name the package following this convention. I have also provided an example for publishing to NPM [here](https://gist.github.com/onajourney/d8f3aa09deb4f9950c660a4ab8bbf9d3). And an attempt at publishing to both GitHub packages and npm [here](https://gist.github.com/onajourney/e5a0b372be30e19220db818ba190b31d) (this one is a WIP as there is a race condition between the publishing jobs- only ones wins the race, the other one sees the tags in the repository and assumes it has already published).
+Since in my example, I am publishing to the GitHub package registry, I have a step to rename my package to follow GitHub's scoped naming convention - this is not necessary; you could, of course, just name the package following this convention. I have also provided an example for publishing to NPM [here](https://gist.github.com/onajourney/d8f3aa09deb4f9950c660a4ab8bbf9d3). And an attempt at publishing to both GitHub packages and npm [here](https://gist.github.com/onajourney/e5a0b372be30e19220db818ba190b31d) (this one is a WIP as there is a race condition between the publishing jobs - only one wins the race, the other one sees the tags in the repository and assumes it has already published).
 
 
 ## Conclusion

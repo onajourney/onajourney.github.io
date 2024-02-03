@@ -18,5 +18,6 @@ I would like to propose the idea that **maintainability** is the most important 
 Alas, this post, the pursuit of pushing the limits of maintainability in the context of building a web application.
 
 ## Follow along:
-1. [Packages]({{< ref "/notes/abstracting-complexity/packages.md" >}})
-2. [Infrastructure - AWS (coming soon)](#)
+1. [Infrastructure]({{< ref "/notes/abstracting-complexity/infrastructure.md" >}})
+2. [Packages]({{< ref "/notes/abstracting-complexity/packages.md" >}})
+3. [CI/CD - (coming soon)](#)

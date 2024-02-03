@@ -16,7 +16,7 @@ Read https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#bundling-custom-cs
 .haiku {
     font-family: serif;
     text-align: center;
-    margin: 24px 0;
+    margin-top: 32px !important;
     padding: 16px;
 }
 
