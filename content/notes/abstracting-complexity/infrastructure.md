@@ -42,7 +42,7 @@ Resources:
 ```
 Under the hood, this does the following: Creates a Lambda function, creates a role (AWSLambdaBasicExecutionRole) for your Lambda function (to allow it to run), creates the gateway (the API endpoint), an API stage resource (to deploy your API endpoint and make it accessible), sets the Lambda permission (to allow the API gateway to call the Lambda), creates a DynamoDB table, creates a policy to allow DynamoDB access from our Lambda function, and finally attaches that policy to our Lambda role.
 
-Just describing it is a mouthful. Declaring it without SAM would require declaring each of these sources, policies, permissions, tables, as individual blocks (taking our file from 23 lines to 111) as can be seen here.
+Just describing it is a mouthful. Declaring it without SAM would require declaring each of these sources, policies, permissions, and  tables as individual blocks (taking our file from 23 to 111 lines) as can be seen [here](https://gist.github.com/onajourney/e1aab0150c06dd7bb6f28318767063f6).
 
 So yes - SAM is exponentially more maintainable than CloudFormation.
 
@@ -186,8 +186,6 @@ Our dynamodb/sample-table.json would contain:
     ]
 }
 ```
-
-And lastly, our lambda/get_all_items/index.js file would contain our Lambda code.
 
 All other resources and policies are declared based on intent and context, and new resources are declared by simply creating new files within their respective resource folder.
 
