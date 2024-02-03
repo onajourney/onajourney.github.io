@@ -23,7 +23,7 @@ weight = 2
 [params.homeInfoParams]
 Title = "J. Daniels"
 Content = "Curiosities of the mind"
-imageUrl = "/avatar.webp"
+imageUrl = "https://avatars.githubusercontent.com/u/113128499"
 imageTitle = "My Avatar"
 imageWidth = 160
 imageHeight = 160
