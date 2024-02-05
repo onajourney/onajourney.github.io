@@ -165,7 +165,7 @@ resources/
 
 In which our api/sample-endpoint.json would contain:
 
-```
+```json
 {
     "route_key": "GET /",
     "runLambda": "get_all_items"
@@ -174,7 +174,7 @@ In which our api/sample-endpoint.json would contain:
 
 Our dynamodb/sample-table.json would contain:
 
-```
+```json
 {
     "name": "SampleTable",
     "hash_key": "id",
